@@ -3,7 +3,7 @@ services:
     name: sapy-backend
     env: python
     plan: free
-    buildCommand: pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt
+    buildCommand: pip install --no-cache-dir --upgrade pip && PIP_ONLY_BINARY=:all: pip install --no-cache-dir --prefer-binary -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     autoDeploy: false
     envVars:
