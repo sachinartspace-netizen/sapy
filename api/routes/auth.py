@@ -4,6 +4,7 @@ Authentication routes - Google OAuth + Phone OTP
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from dotenv import load_dotenv
 from database.db import get_db
 from database.models import User, UserProfile
 from api.schemas.auth import (

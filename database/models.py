@@ -375,7 +375,7 @@ class Payout(Base):
     initiated_at = Column(DateTime, default=datetime.utcnow, index=True)
     completed_at = Column(DateTime, nullable=True)
     failure_reason = Column(String(500), nullable=True)  # Why payout failed
-    metadata = Column(JSON, nullable=True)  # Additional provider data
+    extra_data = Column(JSON, nullable=True)  # Additional provider data
 
 
 # ============================================================================
@@ -393,7 +393,7 @@ class SecurityLog(Base):
     description = Column(String(500))
     ip_address = Column(String(50), nullable=True)
     user_agent = Column(String(500), nullable=True)
-    metadata = Column(JSON, nullable=True)  # Additional context
+    extra_data = Column(JSON, nullable=True)  # Additional context
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
 

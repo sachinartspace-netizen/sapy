@@ -12,18 +12,25 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Database URL
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://sapy:sapy_password@localhost:5432/sapy_db")
+# Database URL - Use SQLite for local development, PostgreSQL for production
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sapy.db")
 
-# Create engine with connection pooling
-engine = create_engine(
-    DATABASE_URL,
-    poolclass=QueuePool,
-    pool_size=20,
-    max_overflow=0,
-    pool_pre_ping=True,  # Verify connections before using
-    echo=False  # Set to True for SQL debugging
-)
+# Create engine with connection pooling (disabled for SQLite)
+if DATABASE_URL.startswith("sqlite://"):
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        echo=False
+    )
+else:
+    engine = create_engine(
+        DATABASE_URL,
+        poolclass=QueuePool,
+        pool_size=20,
+        max_overflow=0,
+        pool_pre_ping=True,
+        echo=False
+    )
 
 # Session factory
 SessionLocal = sessionmaker(
@@ -79,31 +86,8 @@ def init_db():
 
 def create_indexes():
     """Create important indexes for performance"""
-    with engine.connect() as conn:
-        # User lookups
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id)")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone)")
-        
-        # License validation
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_licenses_user_id ON licenses(user_id)")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_licenses_device_id ON licenses(device_id)")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_licenses_license_key ON licenses(license_key)")
-        
-        # Payment tracking
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id)")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status)")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_payments_created_at ON payments(created_at)")
-        
-        # Usage tracking
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_daily_usage_user_date ON daily_usage(user_id, date)")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_usage_logs_user_id ON usage_logs(user_id)")
-        
-        # Subscriptions
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id)")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status)")
-        
-        conn.commit()
+    # Index creation skipped for now - let SQLAlchemy handle through model definitions
+    pass
 
 def initialize_default_settings():
     """Create default admin settings and feature flags"""

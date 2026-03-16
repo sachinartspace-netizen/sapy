@@ -3,14 +3,18 @@ Authentication dependencies - helpers for protecting routes
 """
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthCredentials
+from fastapi.security import HTTPBearer
+from sqlalchemy.orm import Session
+from starlette.requests import Request
 from utils.auth_helpers import verify_token
+from database.db import get_db
+from database.models import User
 from typing import Optional
 
 security = HTTPBearer()
 
 async def get_current_user_id(
-    credentials: HTTPAuthCredentials = Depends(security)
+    credentials = Depends(security)
 ) -> int:
     """
     Extract and verify JWT token from request header
@@ -56,3 +60,17 @@ async def get_current_user_id(
             detail="Invalid user ID in token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+async def get_current_user(
+    user_id: int = Depends(get_current_user_id),
+    db: Session = Depends(get_db)
+) -> User:
+    """Get current user object from database"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    return user

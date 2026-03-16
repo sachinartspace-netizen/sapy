@@ -29,7 +29,7 @@ class LicenseGenerator:
     # RSA key size (production: 2048 bits)
     KEY_SIZE = 2048
     
-    # Paths for key files
+    # Paths for key files (use app directory for local, env for production)
     PRIVATE_KEY_PATH = os.getenv("LICENSE_PRIVATE_KEY_PATH", "./licenses/private_key.pem")
     PUBLIC_KEY_PATH = os.getenv("LICENSE_PUBLIC_KEY_PATH", "./licenses/public_key.pem")
     
